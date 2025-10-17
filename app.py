@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import json
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
@@ -5,10 +6,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from src.agents.ai_agent import TutorAgent, AgentState
 from langchain_core.messages import messages_to_dict, messages_from_dict
 import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # --- App and DB Setup ---
 app = Flask(__name__)
-app.secret_key = 'your_super_secret_key' # Change this in production
+# Use an environment variable for the secret key for better security
+app.secret_key = os.environ.get('SESSION_SECRET', 'dev_secret_key_change_in_production')
 
 # Use an in-memory cache for agent instances to avoid re-initializing them on every request
 agent_cache = {}
@@ -192,6 +198,8 @@ def manage_session():
 
     if request.method == 'DELETE':
         clear_user_session(user_id)
+        if username in agent_cache:
+            del agent_cache[username] # Clear from cache as well
         return jsonify({'status': 'ok'})
 
 @app.route('/api/chat', methods=['POST'])
@@ -217,29 +225,36 @@ def chat():
     current_state = load_agent_state(user_id)
     response_data = {}
 
-    if current_state is None:
-        print(f"---STARTING NEW SESSION FOR {username}---")
-        initial_state = AgentState(
-            topic=user_input, messages=[], user_response="", lesson_plan=[], current_lesson_index=0)
-        final_state = agent.graph.invoke(initial_state)
-    else:
-        print(f"---CONTINUING SESSION FOR {username}---")
-        current_state['user_response'] = user_input
-        final_state = agent.graph.invoke(current_state)
+    try:
+        if current_state is None:
+            print(f"---STARTING NEW SESSION FOR {username}---")
+            initial_state = AgentState(
+                topic=user_input, messages=[], user_response="", lesson_plan=[], current_lesson_index=0)
+            final_state = agent.graph.invoke(initial_state)
+        else:
+            print(f"---CONTINUING SESSION FOR {username}---")
+            current_state['user_response'] = user_input
+            final_state = agent.graph.invoke(current_state)
 
-    if final_state is None:
-        response_data['message'] = "Congratulations! You have completed the lesson plan."
-        response_data['is_finished'] = True
-        clear_user_session(user_id) # Clean up the session from DB
-    else:
-        ai_message = final_state['messages'][-1].content
-        response_data['lesson_plan'] = final_state.get('lesson_plan')
-        response_data['message'] = ai_message
-        save_agent_state(user_id, final_state)
-        save_chat_message(user_id, 'ai', ai_message)
-            
+        if final_state is None:
+            response_data['message'] = "Congratulations! You have completed the lesson plan."
+            response_data['is_finished'] = True
+            clear_user_session(user_id) # Clean up the session from DB
+        else:
+            ai_message = final_state['messages'][-1].content
+            response_data['lesson_plan'] = final_state.get('lesson_plan')
+            response_data['message'] = ai_message
+            save_agent_state(user_id, final_state)
+            save_chat_message(user_id, 'ai', ai_message)
+    
+    except Exception as e:
+        print(f"An error occurred in the agent graph: {e}")
+        response_data['message'] = "Sorry, an internal error occurred. Please try again or start a new topic."
+        response_data['is_error'] = True
+
+
     return jsonify(response_data)
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=5001)
+    app.run(debug=True)

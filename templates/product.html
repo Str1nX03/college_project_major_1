@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Session - AI Tutor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="product-page">
+    <div class="animated-background"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">AI Tutor</span>
+            </div>
+            <div class="nav-links">
+                <div class="user-menu">
+                    <button class="user-button" id="userMenuBtn">
+                        <span class="user-icon">👤</span>
+                        <span class="username">{{ username }}</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <button class="dropdown-item" id="newSessionBtn">
+                            <span>🔄</span>
+                            <span>New Session</span>
+                        </button>
+                        <button class="dropdown-item" id="clearHistoryBtn">
+                            <span>🗑️</span>
+                            <span>Clear History</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ url_for('logout') }}" class="dropdown-item">
+                            <span>🚪</span>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <aside class="lesson-sidebar" id="lessonSidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">Lesson Plan</h3>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <span class="toggle-icon">◀</span>
+                </button>
+            </div>
+            <div class="lesson-list" id="lessonList">
+                <div class="no-lessons">
+                    <div class="no-lessons-icon">📋</div>
+                    <p>Start a conversation to generate your lesson plan</p>
+                </div>
+            </div>
+            <div class="lesson-progress" id="lessonProgress">
+                <div class="progress-text">
+                    <span id="progressCurrent">0</span> / <span id="progressTotal">0</span> Lessons
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <div class="welcome-icon">🚀</div>
+                    <h2 class="welcome-title">Welcome to AI Tutor!</h2>
+                    <p class="welcome-text">Tell me what you'd like to learn, and I'll create a personalized lesson plan for you.</p>
+                    <div class="welcome-examples">
+                        <p class="examples-title">Try asking:</p>
+                        <div class="example-chips">
+                            <button class="example-chip">"Teach me Python programming"</button>
+                            <button class="example-chip">"I want to learn quantum physics"</button>
+                            <button class="example-chip">"Help me understand machine learning"</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="lesson-controls" id="lessonControls" style="display: none;">
+                    <button class="control-btn btn-next" id="nextLessonBtn">
+                        <span>Next Lesson</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                    <button class="control-btn btn-replay" id="replayLessonBtn">
+                        <span>Simplify</span>
+                        <span class="btn-icon">🔄</span>
+                    </button>
+                </div>
+                <form class="chat-input-form" id="chatForm">
+                    <input 
+                        type="text" 
+                        class="chat-input" 
+                        id="chatInput" 
+                        placeholder="Type your message or topic..."
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="btn-send" id="sendBtn">
+                        <span class="send-icon">➤</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

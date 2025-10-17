@@ -2,6 +2,9 @@ import chromadb
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
+from dotenv import load_dotenv
+load_dotenv()
 
 class RAGPipeline:
     """
@@ -38,7 +41,14 @@ class RAGPipeline:
             documents (list): A list of documents (text content) to be added.
         """
         print(f"Adding {len(documents)} documents to the vector store...")
-        texts = self.text_splitter.split_documents(documents)
+        
+        # --- FIX IS HERE ---
+        # 1. Convert the list of strings into a list of Document objects.
+        docs_to_split = [Document(page_content=text) for text in documents]
+        
+        # 2. Now, split the Document objects. This will work correctly.
+        texts = self.text_splitter.split_documents(docs_to_split)
+        
         self.vector_store.add_documents(texts)
         self.retriever = self.vector_store.as_retriever()
         print("Documents added and retriever is ready.")
