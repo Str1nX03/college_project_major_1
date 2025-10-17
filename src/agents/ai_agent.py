@@ -3,11 +3,11 @@ import json
 from typing import TypedDict, Annotated, List
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from pydantic import BaseModel, Field, conlist
-from langchain_ollama.chat_models import ChatOllama
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 from src.pipeline.rag import RAGPipeline
+from langchain_groq.chat_models import ChatGroq
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -71,15 +71,15 @@ class TutorAgent:
     The main class for the AI Tutoring Agent.
     It builds and runs the LangGraph-based agent.
     """
-    def __init__(self, ollama_model: str = "deepseek-v3.1:671b-cloud"):
+    def __init__(self, groq_model: str = "llama-3.1-8b-instant"):
         """
         Initializes the TutorAgent.
 
         Args:
-            ollama_model (str): The name of the Ollama model to use for generation.
+            groq_model (str): The name of the Groq model to use for generation.
         """
         print("Initializing Tutor Agent...")
-        self.llm = ChatOllama(model=ollama_model, temperature=0)
+        self.llm = ChatGroq(model=groq_model, temperature=0)
         self.rag_pipeline = RAGPipeline()
         self.tools = [TavilySearchResults(max_results=5)]
         self.tool_node = ToolNode(self.tools)
