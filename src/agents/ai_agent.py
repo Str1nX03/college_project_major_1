@@ -4,6 +4,7 @@ from typing import TypedDict, Annotated, List
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from pydantic import BaseModel, Field, conlist
 from langchain_ollama.chat_models import ChatOllama
+from langchain_groq.chat_models import ChatGroq
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
